@@ -3,30 +3,32 @@ const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
 const mysql = require('mysql2');
+require('dotenv').config();
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:3001", // Permite solicitudes desde este origen
+    origin: "*", // Permite solicitudes desde cualquier origen
     methods: ["GET", "POST"]
   }
 });
 
-const port = 4000;
+const port = process.env.PORT || 4000;
 
 app.use(cors());
 
 const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '77510331Josep',
-  database: 'dbgeolocalizacion'
+  host: process.env.MYSQL_HOST,
+  user: process.env.MYSQL_USER,
+  password: process.env.MYSQL_PASSWORD,
+  database: process.env.MYSQL_DATABASE,
+  port: process.env.MYSQL_PORT
 });
 
 connection.connect((err) => {
   if (err) throw err;
-  console.log('Conectado a la base de datos MySQL');
+  console.log('Conectado a la base de datos MySQL en Railway');
 });
 
 io.on('connection', (socket) => {
@@ -35,12 +37,8 @@ io.on('connection', (socket) => {
   socket.on('location', (data) => {
     console.log('Ubicación recibida:', data, new Date());
     const { latitude, longitude, userid } = data;
-    
-    // Envía la ubicación de vuelta al cliente
-    //socket.emit('locationUpdate', { latitude, longitude });
 
-    // Aquí manejamos los datos de la ubicación y los guardamos en la base de datos
-    const query = 'update Ubicaciones set latitude = ?, longitude = ? where userid = ?';
+    const query = 'UPDATE Ubicaciones SET latitude = ?, longitude = ? WHERE userid = ?';
     connection.query(query, [latitude, longitude, userid], (err, result) => {
       if (err) {
         console.error('Error al insertar en la base de datos:', err);
