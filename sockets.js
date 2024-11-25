@@ -38,7 +38,7 @@ io.on('connection', (socket) => {
     console.log('Ubicación recibida:', data, new Date());
     const { latitude, longitude, userid } = data;
 
-    const query = 'UPDATE Ubicaciones SET latitude = ?, longitude = ? WHERE userid = ?';
+    const query = 'UPDATE ubicaciones SET latitude = ?, longitude = ? WHERE userid = ?';
     connection.query(query, [latitude, longitude, userid], (err, result) => {
       if (err) {
         console.error('Error al insertar en la base de datos:', err);
